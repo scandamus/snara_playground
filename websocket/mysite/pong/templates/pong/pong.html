@@ -26,7 +26,7 @@
     <input id="pong-message-submit" type="button" value="Send">
     {{ room_name|json_script:"room-name" }}
 
-	<canvas id="pongcanvas" width="600" height="450"></canvas>
+	<canvas id="pongcanvas" width="600" height="300"></canvas>
 	<script>
         const roomName = JSON.parse(document.getElementById('room-name').textContent);
 
@@ -69,6 +69,7 @@
 		let send_interval = setInterval(send_message, 42);
 
 		//
+		// simple_pong.js
 		//
 
 		const canvas = document.getElementById("pongcanvas");

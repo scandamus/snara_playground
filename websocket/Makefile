@@ -3,4 +3,4 @@ run: stop
 	-python mysite/manage.py runserver
 
 stop:
-	docker stop `docker ps -qa`
+	-docker stop `docker ps -qa`

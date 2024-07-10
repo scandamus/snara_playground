@@ -25,6 +25,143 @@ class Storage {
 
 const sessionStorage = new Storage();
 
+const labels = {
+	langCode: 'en',
+	langName: 'English',
+	home: {
+		title: 'Home',
+		labelUsername: 'username',
+		labelPassword: 'password',
+		labelButtonLogin: 'log in',
+		labelButtonLogout: 'log out',
+		textSignUp: 'If you don\'t have an account:',
+		labelLinkSignUp: 'sign up',
+	},
+	register: {
+		title: 'Register',
+		labelUsername: 'username',
+		labelPassword: 'password',
+		labelPasswordConfirm: 'confirm password',
+		descUsername: ['You can use lowercase alphabets, numbers, and underscore (a-z 0-9 _)', 'You need to use at least one alphabet or number', '3 to 32 characters long'],
+		descPassword: ['You can use uppercase and lowercase alphabets, numbers, and following symbols (@_#$%&!.,+*~\')', 'You need to use at least one uppercase, one lowercase, one number, and one symbol', '8 to 24 characters long'],
+		descPasswordConfirm: 'Please confirm the password',
+		labelButtonConfirm: 'confirm',
+		textConfirm: 'Do you want to register with the following information?',
+		labelButtonRegister: 'register',
+		labelButtonBack: 'go back',
+		textComplete: 'Registration complete.',
+		labelButtonLogin: 'log in',
+	},
+	formErrorMessages: {
+		valueMissing: 'This field is required.',
+		patternMismatch: 'Please check the character type requirement.',
+		tooLong: 'Too many characters.',
+		tooShort: 'Too few characters.',
+		passwordIsNotSame: 'The passwords do not match.',
+		isExists: 'This username is already taken.',
+		loginError1: 'Login failed. Please check your username and password.',
+		loginError2: 'Something went wrong. Unable to log in.',
+	},
+
+	dashboard: {
+		title: 'Dashboard',
+		labelChangeAvatar: 'change avatar',
+		labelCancel: 'cancel',
+		labelUpload: 'upload',
+		msgAvatarSwitched: 'avatar successfully changed',
+		msgInvalidFile: 'file is invalid',
+		msgInvalidFileFormat: 'invalid file format (only .jpg and .png are accepted)',
+		labelViewAllFriends: 'View all friends',
+	},
+	friends: {
+		title: 'Friends',
+		labelMatch: 'start a match',
+		labelReceiveMatch: 'take the match',
+		labelCancel: 'cancel',
+		labelRmFriend: 'remove friend',
+		labelAccept: 'accept',
+		labelDecline: 'decline',
+		labelApply: 'start a match',
+		labelSearch: 'send friend request',
+		labelSendRequest: 'send',
+		labelRequest: 'friend request',
+		msgNoUsername: 'Enter a username to send friend request',
+		msgNoFriends: 'no friends yet',
+		labelListFriends: 'friends',
+		labelReceivedRequest: 'friend requests',
+		labelRecommended: 'recommended',
+		msgNoRecommended: 'no recommended player',
+	},
+	lounge: {
+		title: 'Lounge',
+		labelMatch: 'enter',
+		labelCreateRoom: 'create a room',
+		labelDualGame: '2-player match',
+		labelQuadGame: '4-player match',
+		labelCapacity: 'capacity',
+		labelAvailable: 'available',
+		labelWaiting: 'looking for opponent',
+	},
+	match: {
+		title: '',
+		labelMatch: 'start a match',
+		labelReceiveMatch: 'take the match',
+		labelMatchLog: 'match log',
+		labelWins: 'wins',
+		labelLosses: 'losses',
+		fmtWinLoss: '$win wins, $loss losses',
+		msgNoMatch: 'no match log',
+	},
+	tournament: {
+		title: 'Tournament',
+		labelCreateTournament: 'create a tournament',
+		labelTournamentTitle: 'tournament title',
+		labelStart: 'start time',
+		labelEntry: 'entry',
+		labelCancelEntry: 'cancel',
+		labelTitleUpcoming: 'upcoming tournaments',
+		labelTitleInPlay: 'ongoing tournaments',
+		labelTitleRecent: 'finished tournaments',
+		labelTournamentLog: 'tournament log',
+	},
+	modal: {
+		labelNickname: 'nickname',
+		labelEntry: 'entry',
+		labelCancel: 'cancel',
+		labelAccept: 'accept',
+		labelReject: 'reject',
+		labelCapacity: 'capacity',
+		labelAvailable: 'available',
+		labelExitGame:  'exit',
+		labelReturnToGame:  'Return to game',
+		titleSendMatchRequest: 'sent a match request',
+		titleReceiveMatchRequest: 'you received a match request',
+		titleWaitForOpponent: 'waiting for an opponent...',
+		titleEntryTournament:  'participate in tournament',
+		titleExitGame:  'Leave the game?',
+	},
+	friendRequest: {
+		alreadyFriends: '$name is already your friend',
+		usernameNotExists: '$name does not exist',
+		sendFriendReqSelf: 'you cannot be a friend of yourself',
+		invalidDeclineFriendReq: 'failed to delete friend request',
+		sentRequestSuccess: 'friend request has been sent to $name',
+		acceptRequestSuccess: '$name is now your friend',
+		declineRequestSuccess: 'friend request from $name has been deleted',
+		removeSuccess: '$name is no longer your friend',
+		received: '$name has sent you a friend request',
+		accepted: '$name has accepted your friend request',
+		removed: '$name is no longer your friend',
+	},
+	matchRequest: {
+		accepted: 'game is starting',
+		cancelled: 'opponent cancelled the match',
+		rejected: 'opponent has rejected to play',
+		userOffline: 'opponent is offline',
+		playerNotWaitingStatus: 'opponent is busy now',
+	},
+};
+
 const getToken = (nameToken) => {
 	const token = sessionStorage.getItem(nameToken);
 	if (token === null) {
@@ -38,7 +175,7 @@ const getToken = (nameToken) => {
 
 const refreshAccessToken = async () => {
 	const refreshToken = getToken('refreshToken');
-	console.log(`refreshToken: ${refreshToken}`);
+	// console.log(`refreshToken: ${refreshToken}`);
 	// ネットワークエラー、サーバーエラー、ストレージエラーの例外に対応
 	try {
 		// SimpleJWTのリフレッシュトークン発行はbodyにrefreshを渡す仕様
@@ -53,10 +190,10 @@ const refreshAccessToken = async () => {
 		});
 		if (response.ok) {
 			const refreshData = await response.json();
-			console.log(`refreshData: `, refreshData);
+			// console.log(`refreshData: `, refreshData);
 			sessionStorage.setItem('accessToken', refreshData.access);
 			sessionStorage.setItem('refreshToken', refreshData.refresh);
-			console.log(`Successfully token refreshed: ${refreshData.access}`);
+			// console.log(`Successfully token refreshed: ${refreshData.access}`);
 			return refreshData.access;
 		}
 		// TODO: logout処理に飛ばす
@@ -103,9 +240,9 @@ const initToken = async () => {
 	console.log('initToken in');
 	try {
 		const tokenResult = await getValidToken('accessToken');
-		console.log('tokenResult: ', tokenResult);
+		// console.log('tokenResult: ', tokenResult);
 		if (tokenResult.token) {
-			console.log('accessToken: ', tokenResult.token);
+			// console.log('accessToken: ', tokenResult.token);
 			return tokenResult;
 		} else {
 			console.error('Token error: ', tokenResult.error);
@@ -146,7 +283,7 @@ class WebSocketManager {
 				+ '/';
 
 			console.log(`new WebSocket('${url}')`);
-			const socket = new WebSocket(url);
+			const socket = new WebSocket(url, [], {origin: 'http://'+HOST});
 
 			// 接続したら必ずAccessTokenを送る
 			socket.onopen = () => {
@@ -237,7 +374,7 @@ class WebSocketManager {
 		console.log(`sendAccessToken to ${containerId}`);
 		try {
 			const accessToken = await initToken();
-			//            await webSocketManager.openWebSocket(containerId, this.messageHandlers[containerId]);
+			await webSocketManager.openWebSocket(containerId, this.messageHandlers[containerId]);
 			console.log('sendAccessToken: initToken() finish');
 			const message = {
 				type: 'authWebSocket',
@@ -262,6 +399,7 @@ const pongHandler = (event, containerId) => {
 	let data;
 	try {
 		data = JSON.parse(event.data);
+		console.log(`Message from ${containerId}: `, data);
 		if (data.type === 'authenticationFailed') {
 			console.error(data.message);
 			refreshAccessToken();
@@ -312,7 +450,6 @@ const pongGameHandler = (event, containerId) => {
 		console.error(data.error);
 		refreshAccessToken();
 	}
-	console.log(`Message from ${containerId}: `, data);
 }
 
 const addNotice = (msg, iserror) => {
@@ -326,7 +463,7 @@ const addNotice = (msg, iserror) => {
 const loadGameContent = async (data) => {
 	const { game_name, jwt, match_id, username, player_name } = data;
 
-	closeModal();
+	//closeModal();
 
 	console.log(`Loading ${game_name} content with JWT: `, jwt);
 	console.log(`match_id: ${match_id}, Username: ${username}, Player_name: ${player_name}`);
@@ -347,12 +484,13 @@ const loadGameContent = async (data) => {
 			console.log('Token sent to pong-server');
 			// TODO: ゲーム画面に変遷してゲーム続行
 			if (game_name === 'pong') {
-				window.history.pushState({}, null, `/game/pong/play:${gameMatchId}`);
+				//window.history.pushState({}, null, `/game/pong/play:${gameMatchId}`);
 			} else {
 				// game_name === 'pong4'
-				window.history.pushState({}, null, `/game/pong4/play:${gameMatchId}`);
+				//window.history.pushState({}, null, `/game/pong4/play:${gameMatchId}`);
 			}
-			await router(true);
+			//await router(true);
+			initGame(containerId);
 		} else {
 			console.error('WebSocket is not in OPEN state.');
 		}
@@ -362,8 +500,8 @@ const loadGameContent = async (data) => {
 }
 
 const handleFriendRequestAck = (data) => {
-	const currentPage = (PageBase.isInstance(PageBase.instance, 'Friends') || PageBase.isInstance(PageBase.instance, 'Dashboard'))
-		? PageBase.instance : null;
+	// const currentPage = (PageBase.isInstance(PageBase.instance, 'Friends') || PageBase.isInstance(PageBase.instance, 'Dashboard')) ? PageBase.instance : null;
+	const currentPage = null;
 	if (data.action === 'error') {
 		if (data.error === 'alreadyFriends') {
 			addNotice(labels.friendRequest['alreadyFriends'].replace('$name', data.username), false);
@@ -405,8 +543,8 @@ const handleFriendRequestAck = (data) => {
 }
 
 const handleFriendRequestReceived = (data) => {
-	const currentPage = (PageBase.isInstance(PageBase.instance, 'Friends') || PageBase.isInstance(PageBase.instance, 'Dashboard'))
-		? PageBase.instance : null;
+	// const currentPage = (PageBase.isInstance(PageBase.instance, 'Friends') || PageBase.isInstance(PageBase.instance, 'Dashboard')) ? PageBase.instance : null;
+	const currentPage = null;
 
 	console.log('handleFriendRepuestReceived: received');
 	if (data.action === 'received') {
@@ -431,19 +569,19 @@ const handleFriendRequestReceived = (data) => {
 const handleFriendMatchRequestReceived = (data) => {
 	if (data.action === 'requested') {
 		// TODO: すでに別のプレイヤーからのリクエストが来ている場合の処理
-		showModalReceiveMatchRequest(data);
+		//showModalReceiveMatchRequest(data);
 	} else if (data.action === 'accepted') {
 		// 対戦相手がアクセプトボタンを押した
 	} else if (data.action === 'cancelled') {
 		// 対戦を申し込んだ主がキャンセルボタンを押した
-		closeModal();
+		//closeModal();
 		addNotice(labels.matchRequest['cancelled'], true);
 	} else if (data.action === 'rejected') {
 		// 申し込んだ相手がリジェクトボタンを押した
-		closeModal();
+		//closeModal();
 		addNotice(labels.matchRequest['rejected'], true);
 	} else if (data.action === 'error') {
-		closeModal();
+		//closeModal();
 		if (data.error === 'playerNotWaitingStatus') {
 			addNotice(labels.matchRequest['playerNotWaitingStatus'], true);
 		} else if (data.error === 'userOffline') {
@@ -456,16 +594,16 @@ const handleFriendMatchRequestReceived = (data) => {
 
 const handleLoungeMatchReceived = (data) => {
 	if (data.action === 'update') {
-		updateModalAvailablePlayers(data.availablePlayers);
+		//updateModalAvailablePlayers(data.availablePlayers);
 	} else if (data.action === 'error') {
-		closeModal();
+		//closeModal();
 		alert(`Error: ${data.message}`);
 	}
 }
 
 const handleFriendStatusReceived = (data) => {
-	const currentPage = (PageBase.isInstance(PageBase.instance, 'Friends') || PageBase.isInstance(PageBase.instance, 'Dashboard'))
-		? PageBase.instance : null;
+	// const currentPage = (PageBase.isInstance(PageBase.instance, 'Friends') || PageBase.isInstance(PageBase.instance, 'Dashboard')) ? PageBase.instance : null;
+	const currentPage = null;
 
 	if (data.action === 'change') {
 		const online_status_msg = data.online === 'online' ? 'ログイン' : 'ログアウト';
@@ -494,6 +632,50 @@ const handleTournamentReceived = (data) => {
 
 ////
 
+const join_lounge_game = async(gameName) => {
+	console.log(`join_${gameName}`);
+	try {
+		const accessToken = await initToken();
+		await webSocketManager.openWebSocket('lounge', pongHandler);
+		webSocketManager.sendWebSocketMessage('lounge', {
+			type: 'lounge',
+			action: 'requestJoinMatch',
+			game: gameName,
+			token: accessToken.token
+		});
+		console.log(`Request join_game: ${gameName}  sent to backend.`);
+	} catch (error) {
+		console.error('Failed to open or send through WebSocket: ', error);
+	}
+}
+
+////
+
+const updateGameObjects = (data) => {
+}
+
+const initGame = (containerId) => {
+	try {
+		const pongSocket = webSocketManager.openWebSocket(containerId);
+		pongSocket.onmessage = (e) => {
+			try {
+				const data = JSON.parse(e.data);
+				// document.querySelector('#pong-log').value += (data.message + '\n');
+				// console.log('received_data -> ', data);
+				// console.log('RIGHT_PADDLE: ', data.right_paddle.score, '  LEFT_PADDLE: ', data.left_paddle.score);
+				updateGameObjects(data);
+				//this.playSound(data.sound_type);
+			} catch (error) {
+				console.error('Error parsing message data:', error);
+			}
+		}
+	} catch {
+		console.error('Error initializing game:', error);
+	}
+}
+
+////
+
 const main = () => {
 	const username = process.env.DJANGO_PLAYER1_USER;
 	const password = process.env.DJANGO_PLAYER1_PASSWORD;
@@ -513,16 +695,17 @@ const main = () => {
 			throw new Error('loginError');
 		}
 		return response.json();
-	}).then(data => {
-		console.log(data);
+	}).then((data) => {
+		console.log('successfully logged in as ', username);
 		sessionStorage.setItem('accessToken', data.access_token);
 		sessionStorage.setItem('refreshToken', data.refresh_token);
 		webSocketManager.openWebSocket('lounge', pongHandler)
 			.then(() => {})
-			.catch((error) => {
-				console.error('error opening websocket');
-			});
-	})
+	}).then(() => {
+		join_lounge_game('pong');
+	}).catch((error) => {
+		console.error('error:', error);
+	});
 }
 
-main()
+main();

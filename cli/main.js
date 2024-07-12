@@ -651,16 +651,43 @@ const join_lounge_game = async(gameName) => {
 
 ////
 
-const updateGameObjects = (data) => {
-}
-
-const initGame = (containerId) => {
+const initGame = async (containerId) => {
 	try {
-		const pongSocket = webSocketManager.openWebSocket(containerId);
+		const pongSocket = await webSocketManager.openWebSocket(containerId);
+
+		const sendKeyEvent = (key, is_pressed) => {
+			let data = {
+				action: 'key_event',
+				key: key,
+				is_pressed: is_pressed,
+			};
+			webSocketManager.sendWebSocketMessage(containerId, data);
+		}
+
+
+		const updateGameObjects = (data) => {
+			const esc_seq = '\x1b[';
+			console.log(`${esc_seq}2J`);
+			console.log(`${esc_seq}${Math.floor(data.ball.y / 16)};${Math.round(data.ball.x / 8)}Ho`);
+			console.log(`${esc_seq}${Math.floor(data.left_paddle.y / 16)};${Math.round(data.left_paddle.x / 8)}H|`);
+			console.log(`${esc_seq}${Math.floor(data.right_paddle.y / 16)};${Math.round(data.right_paddle.x / 8)}H|`);
+
+			if (!data.game_status) {
+				console.log('game over');
+
+				const gameMatchId = containerId.substr(containerId.indexOf('/'));
+				pongSocket.send(JSON.stringify({
+					action: 'end_game',
+					match_id: gameMatchId,
+				}));
+				webSocketManager.closeWebSocket(containerId);
+				process.exit(0);
+			};
+		}
+
 		pongSocket.onmessage = (e) => {
 			try {
 				const data = JSON.parse(e.data);
-				// document.querySelector('#pong-log').value += (data.message + '\n');
 				// console.log('received_data -> ', data);
 				// console.log('RIGHT_PADDLE: ', data.right_paddle.score, '  LEFT_PADDLE: ', data.left_paddle.score);
 				updateGameObjects(data);
@@ -669,7 +696,7 @@ const initGame = (containerId) => {
 				console.error('Error parsing message data:', error);
 			}
 		}
-	} catch {
+	} catch (error) {
 		console.error('Error initializing game:', error);
 	}
 }
@@ -708,4 +735,8 @@ const main = () => {
 	});
 }
 
-main();
+try {
+	main();
+} catch (error) {
+	console.error('error:', error);
+}

@@ -426,7 +426,7 @@ const pongHandler = (event, containerId) => {
 			handleFriendStatusReceived(data);
 		}
 		else if (data.type === 'tournament') {
-			handleTournamentReceived(data);
+			// handleTournamentReceived(data);
 		}
 	} catch(error) {
 		console.error(`Error parsing data from ${containerId}: `, error);
@@ -570,6 +570,7 @@ const handleFriendMatchRequestReceived = (data) => {
 	if (data.action === 'requested') {
 		// TODO: すでに別のプレイヤーからのリクエストが来ている場合の処理
 		//showModalReceiveMatchRequest(data);
+		addNotice(labels.modal['titleReceiveMatchRequest'], true);
 	} else if (data.action === 'accepted') {
 		// 対戦相手がアクセプトボタンを押した
 	} else if (data.action === 'cancelled') {
@@ -606,27 +607,12 @@ const handleFriendStatusReceived = (data) => {
 	const currentPage = null;
 
 	if (data.action === 'change') {
-		const online_status_msg = data.online === 'online' ? 'ログイン' : 'ログアウト';
+		const online_status_msg = data.online === 'online' ? 'logged in' : 'logged out';
 		console.log(`friendStatus change: ${data.username} to ${online_status_msg}`);
-		addNotice(`${data.username}が${online_status_msg}しました`, false);
+		addNotice(`${data.username} ${online_status_msg}`, false);
 		if (currentPage) {
 			updateFriendsList(currentPage).then(() => {});
 		}
-	}
-}
-
-const handleTournamentReceived = (data) => {
-	if (data.action === 'created') {
-		const startUTC = new Date(data.start);
-		const startLocal = startUTC.toLocaleString();
-		console.log(`UTC Time: ${startUTC.toISOString()}`);
-		console.log(`Local Time: ${startLocal}`);
-		const message = `${data.name} - ${startLocal} が作成されました`;
-		console.log(`${message}`);
-		addNotice(message, false);
-	} else if (data.action === 'alreadyExists') {
-		const message = `同名のトーナメントがすでに存在しています`;
-		addNotice(message, true);
 	}
 }
 
@@ -656,7 +642,7 @@ const initGame = async (containerId) => {
 		const pongSocket = await webSocketManager.openWebSocket(containerId);
 
 		const sendKeyEvent = (key, is_pressed) => {
-			let data = {
+			const data = {
 				action: 'key_event',
 				key: key,
 				is_pressed: is_pressed,
@@ -664,13 +650,48 @@ const initGame = async (containerId) => {
 			webSocketManager.sendWebSocketMessage(containerId, data);
 		}
 
+		const enable_getch = async function(){
+			let old_ch = null;
+			const readline=require("readline");
+			readline.emitKeypressEvents(process.stdin);
+			process.stdin.setRawMode(true);
+
+			await new Promise(resolve => {
+				process.stdin.on("keypress",function self(key,ch){
+					if(ch.name == "escape") {
+						console.log('removeListener');
+						process.stdin.removeListener("keypress",self);
+						return resolve();
+					}
+					console.log(ch.name);
+					if (old_ch) {
+						sendKeyEvent(old_ch, false);
+					}
+					old_ch = ch.name;
+					sendKeyEvent(ch.name, true);
+				});
+			});
+
+			process.stdin.setRawMode(false);
+		};
+
+		enable_getch();
+
+		const clear_screen = () => {
+			console.log('\x1b[2J');
+		};
+		const mvprint = (y, x, ch) => {
+			const esc_seq = '\x1b[';
+			console.log(`${esc_seq}${Math.floor(y)};${Math.round(x)}H${ch}`);
+		};
 
 		const updateGameObjects = (data) => {
-			const esc_seq = '\x1b[';
-			console.log(`${esc_seq}2J`);
-			console.log(`${esc_seq}${Math.floor(data.ball.y / 16)};${Math.round(data.ball.x / 8)}Ho`);
-			console.log(`${esc_seq}${Math.floor(data.left_paddle.y / 16)};${Math.round(data.left_paddle.x / 8)}H|`);
-			console.log(`${esc_seq}${Math.floor(data.right_paddle.y / 16)};${Math.round(data.right_paddle.x / 8)}H|`);
+			clear_screen();
+			mvprint((data.ball.y / 16), (data.ball.x / 8), (data.ball.y % 16 < 8) ? 'º' : 'o');
+			mvprint((data.left_paddle.y / 16), (data.left_paddle.x / 8), '|');
+			mvprint((data.left_paddle.y / 16)+1, (data.left_paddle.x / 8), '|');
+			mvprint((data.right_paddle.y / 16), (data.right_paddle.x / 8), '|');
+			mvprint((data.right_paddle.y / 16)+1, (data.right_paddle.x / 8), '|');
 
 			if (!data.game_status) {
 				console.log('game over');
@@ -683,7 +704,7 @@ const initGame = async (containerId) => {
 				webSocketManager.closeWebSocket(containerId);
 				process.exit(0);
 			};
-		}
+		};
 
 		pongSocket.onmessage = (e) => {
 			try {

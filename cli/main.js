@@ -3,7 +3,7 @@
 const WebSocket = require('ws');
 require('dotenv').config();
 
-const HOST = 'localhost';
+const HOST = process.env.DOMAIN_NAME || 'localhost';
 
 class Storage {
 	constructor() {
@@ -132,13 +132,13 @@ const labels = {
 		labelReject: 'reject',
 		labelCapacity: 'capacity',
 		labelAvailable: 'available',
-		labelExitGame:  'exit',
-		labelReturnToGame:  'Return to game',
+		labelExitGame: 'exit',
+		labelReturnToGame: 'Return to game',
 		titleSendMatchRequest: 'sent a match request',
 		titleReceiveMatchRequest: 'you received a match request',
 		titleWaitForOpponent: 'waiting for an opponent...',
-		titleEntryTournament:  'participate in tournament',
-		titleExitGame:  'Leave the game?',
+		titleEntryTournament: 'participate in tournament',
+		titleExitGame: 'Leave the game?',
 	},
 	friendRequest: {
 		alreadyFriends: '$name is already your friend',
@@ -233,7 +233,7 @@ const getValidToken = async (nameToken) => {
 		console.error('Failed to refresh token.');
 		return { token: null, error: 'Failed to refresh token' };
 	}
-	return { token: refreshedToken, error: (!refreshedToken ? null : 'No access token though refresh is success')};
+	return { token: refreshedToken, error: (!refreshedToken ? null : 'No access token though refresh is success') };
 }
 
 const initToken = async () => {
@@ -283,7 +283,7 @@ class WebSocketManager {
 				+ '/';
 
 			console.log(`new WebSocket('${url}')`);
-			const socket = new WebSocket(url, [], {origin: 'http://'+HOST});
+			const socket = new WebSocket(url, [], { origin: 'http://' + HOST });
 
 			// 接続したら必ずAccessTokenを送る
 			socket.onopen = () => {
@@ -428,7 +428,7 @@ const pongHandler = (event, containerId) => {
 		else if (data.type === 'tournament') {
 			// handleTournamentReceived(data);
 		}
-	} catch(error) {
+	} catch (error) {
 		console.error(`Error parsing data from ${containerId}: `, error);
 	}
 }
@@ -437,7 +437,7 @@ const pongGameHandler = (event, containerId) => {
 	let data;
 	try {
 		data = JSON.parse(event.data);
-	} catch(error) {
+	} catch (error) {
 		console.error(`Error parsing data from ${containerId}: `, error);
 	}
 	if (data.type === 'startGame') {
@@ -518,26 +518,26 @@ const handleFriendRequestAck = (data) => {
 		console.log('Friend request by username is sent to ', data.to_username);
 		addNotice(labels.friendRequest['sentRequestSuccess'].replace('$name', data.to_username), false);
 		if (currentPage) {
-			updateFriendRequestList(currentPage).then(() => {});
+			updateFriendRequestList(currentPage).then(() => { });
 		}
 	} else if (data.action === 'acceptRequestSuccess') {
 		console.log('Accept friend request is successfully done');
 		addNotice(labels.friendRequest['acceptRequestSuccess'].replace('$name', data.from_username), false);
 		if (currentPage) {
-			updateFriendRequestList(currentPage).then(() => {});
-			updateFriendsList(currentPage).then(() => {});
+			updateFriendRequestList(currentPage).then(() => { });
+			updateFriendsList(currentPage).then(() => { });
 		}
 	} else if (data.action === 'declineRequestSuccess') {
 		console.log('Decline friend request is successfully done');
 		addNotice(labels.friendRequest['declineRequestSuccess'].replace('$name', data.username), false);
 		if (currentPage) {
-			updateFriendRequestList(currentPage).then(() => {});
+			updateFriendRequestList(currentPage).then(() => { });
 		}
 	} else if (data.action === 'removeSuccess') {
 		console.log('Remove Successfully done');
 		addNotice(labels.friendRequest['removeSuccess'].replace('$name', data.username), false);
 		if (currentPage) {
-			updateFriendsList(currentPage).then(() => {});
+			updateFriendsList(currentPage).then(() => { });
 		}
 	}
 }
@@ -550,18 +550,18 @@ const handleFriendRequestReceived = (data) => {
 	if (data.action === 'received') {
 		addNotice(labels.friendRequest['received'].replace('$name', data.from_username), false);
 		if (currentPage) {
-			updateFriendRequestList(currentPage).then(() => {});
+			updateFriendRequestList(currentPage).then(() => { });
 		}
 	} else if (data.action === 'accepted') {
 		addNotice(labels.friendRequest['accepted'].replace('$name', data.from_username), false);
 		if (currentPage) {
-			updateFriendsList(currentPage).then(() => {});
+			updateFriendsList(currentPage).then(() => { });
 		}
 	} else if (data.action === 'removed') {
 		//rmられは通知されない
 		console.log(labels.friendRequest['removed'].replace('$name', data.from_username));
 		if (currentPage) {
-			updateFriendsList(currentPage).then(() => {});
+			updateFriendsList(currentPage).then(() => { });
 		}
 	}
 }
@@ -611,14 +611,14 @@ const handleFriendStatusReceived = (data) => {
 		console.log(`friendStatus change: ${data.username} to ${online_status_msg}`);
 		addNotice(`${data.username} ${online_status_msg}`, false);
 		if (currentPage) {
-			updateFriendsList(currentPage).then(() => {});
+			updateFriendsList(currentPage).then(() => { });
 		}
 	}
 }
 
 ////
 
-const join_lounge_game = async(gameName) => {
+const join_lounge_game = async (gameName) => {
 	console.log(`join_${gameName}`);
 	try {
 		const accessToken = await initToken();
@@ -650,17 +650,17 @@ const initGame = async (containerId) => {
 			webSocketManager.sendWebSocketMessage(containerId, data);
 		}
 
-		const enable_getch = async function(){
+		const enable_getch = async function() {
 			let old_ch = null;
-			const readline=require("readline");
+			const readline = require("readline");
 			readline.emitKeypressEvents(process.stdin);
 			process.stdin.setRawMode(true);
 
 			await new Promise(resolve => {
-				process.stdin.on("keypress",function self(key,ch){
-					if(ch.name == "escape") {
+				process.stdin.on("keypress", function self(key, ch) {
+					if (ch.name == "escape") {
 						console.log('removeListener');
-						process.stdin.removeListener("keypress",self);
+						process.stdin.removeListener("keypress", self);
 						return resolve();
 					}
 					console.log(ch.name);
@@ -689,9 +689,9 @@ const initGame = async (containerId) => {
 			clear_screen();
 			mvprint((data.ball.y / 16), (data.ball.x / 8), (data.ball.y % 16 < 8) ? 'º' : 'o');
 			mvprint((data.left_paddle.y / 16), (data.left_paddle.x / 8), '|');
-			mvprint((data.left_paddle.y / 16)+1, (data.left_paddle.x / 8), '|');
+			mvprint((data.left_paddle.y / 16) + 1, (data.left_paddle.x / 8), '|');
 			mvprint((data.right_paddle.y / 16), (data.right_paddle.x / 8), '|');
-			mvprint((data.right_paddle.y / 16)+1, (data.right_paddle.x / 8), '|');
+			mvprint((data.right_paddle.y / 16) + 1, (data.right_paddle.x / 8), '|');
 
 			if (!data.game_status) {
 				console.log('game over');
@@ -728,7 +728,7 @@ const main = () => {
 	const username = process.env.DJANGO_PLAYER1_USER;
 	const password = process.env.DJANGO_PLAYER1_PASSWORD;
 	process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-	fetch('https://'+HOST+'/api/players/login/', {
+	fetch('https://' + HOST + '/api/players/login/', {
 		'method': 'POST',
 		'headers': {
 			'Content-Type': 'application/json'
@@ -748,7 +748,7 @@ const main = () => {
 		sessionStorage.setItem('accessToken', data.access_token);
 		sessionStorage.setItem('refreshToken', data.refresh_token);
 		webSocketManager.openWebSocket('lounge', pongHandler)
-			.then(() => {})
+			.then(() => { })
 	}).then(() => {
 		join_lounge_game('pong');
 	}).catch((error) => {

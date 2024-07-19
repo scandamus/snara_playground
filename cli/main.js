@@ -355,7 +355,7 @@ class WebSocketManager {
 		const socket = this.sockets[containerId];
 		if (socket && socket.readyState === WebSocket.OPEN) {
 			socket.send(JSON.stringify(message));
-			console.log(`Message sent to ${containerId}:`, message);
+			// console.log(`Message sent to ${containerId}:`, message);
 		} else {
 			console.error(`WebSocket for ${containerId} is not open.`);
 		}

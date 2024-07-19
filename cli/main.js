@@ -663,12 +663,13 @@ const initGame = async (containerId) => {
 						process.stdin.removeListener("keypress", self);
 						return resolve();
 					}
-					console.log(ch.name);
 					if (old_ch) {
 						sendKeyEvent(old_ch, false);
 					}
-					old_ch = ch.name;
-					sendKeyEvent(ch.name, true);
+					if (ch.name === 'w' || ch.name === 's') {
+						old_ch = ch.name;
+						sendKeyEvent(ch.name, true);
+					}
 				});
 			});
 
@@ -682,16 +683,16 @@ const initGame = async (containerId) => {
 		};
 		const mvprint = (y, x, ch) => {
 			const esc_seq = '\x1b[';
-			console.log(`${esc_seq}${Math.floor(y)};${Math.round(x)}H${ch}`);
+			console.log(`${esc_seq}${Math.floor(y)+1};${Math.round(x)}H${ch}`);
 		};
 
 		const updateGameObjects = (data) => {
 			clear_screen();
-			mvprint((data.ball.y / 16), (data.ball.x / 8), (data.ball.y % 16 < 8) ? 'º' : 'o');
 			mvprint((data.left_paddle.y / 16), (data.left_paddle.x / 8), '|');
 			mvprint((data.left_paddle.y / 16) + 1, (data.left_paddle.x / 8), '|');
 			mvprint((data.right_paddle.y / 16), (data.right_paddle.x / 8), '|');
 			mvprint((data.right_paddle.y / 16) + 1, (data.right_paddle.x / 8), '|');
+			mvprint((data.ball.y / 16), (data.ball.x / 8), (data.ball.y % 16 < 8) ? 'º' : 'o');
 
 			if (!data.game_status) {
 				console.log('game over');
